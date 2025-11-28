@@ -1,0 +1,35 @@
+version: '3.8'
+services:
+  # 1. Identity Provider
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0.0
+    command: start-dev
+    environment:
+      - KC_BOOTSTRAP_ADMIN_USERNAME=admin
+      - KC_BOOTSTRAP_ADMIN_PASSWORD=admin
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+      - KC_HOSTNAME=localhost
+      - KC_HOSTNAME_PORT=8080
+    ports:
+      - "8080:8080"
+      - "4566:4566" # Expose LocalStack port via Keycloak's network
+    networks:
+      - cloud-net
+
+  # 2. AWS Cloud Simulator (STS + KMS)
+  localstack:
+    image: localstack/localstack:latest
+    volumes:
+      # Map your local script -> Into the container's auto-run folder
+      - ./init-aws.sh:/etc/localstack/init/ready.d/init-aws.sh
+    environment:
+      - SERVICES=sts,iam,kms
+      - DEBUG=1
+      - AWS_DEFAULT_REGION=us-east-1
+    network_mode: service:keycloak
+    depends_on:
+      - keycloak
+
+networks:
+  cloud-net:
