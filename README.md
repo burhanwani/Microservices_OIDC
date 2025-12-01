@@ -62,6 +62,8 @@ curl http://localhost:5000/retrieve/secret1
 
 ## Architecture
 
+![Architecture Diagram](images/architecture.png)
+
 ### Components
 -   **Server**: Flask App. Authenticates with Keycloak. Calls KMS. Connects to Redis (plaintext -> Envoy -> mTLS).
 -   **Redis**: Standard Redis. Envoy sidecar handles mTLS termination.
